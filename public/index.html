@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Validator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="email"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input[type="email"]:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .valid {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .invalid {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .api-info {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📧 Email Validator</h1>
+        
+        <div class="form-group">
+            <label for="email">Enter Email Address:</label>
+            <input type="email" id="email" placeholder="example@domain.com" required>
+        </div>
+        
+        <button onclick="validateEmail()">Validate Email</button>
+        
+        <div id="result" class="result"></div>
+        
+        <div class="api-info">
+            <h3>API Endpoints:</h3>
+            <ul>
+                <li><strong>POST /validate</strong> - Validate email via POST request</li>
+                <li><strong>GET /validate/:email</strong> - Validate email via URL parameter</li>
+                <li><strong>GET /health</strong> - Health check endpoint</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function validateEmail() {
+            const emailInput = document.getElementById('email');
+            const resultDiv = document.getElementById('result');
+            const email = emailInput.value.trim();
+            
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/validate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.style.display = 'block';
+                resultDiv.className = `result ${data.isValid ? 'valid' : 'invalid'}`;
+                resultDiv.innerHTML = `
+                    <strong>Result:</strong> ${data.message}<br>
+                    <strong>Email:</strong> ${data.email}<br>
+                    <strong>Valid:</strong> ${data.isValid ? '✅ Yes' : '❌ No'}
+                `;
+            } catch (error) {
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result invalid';
+                resultDiv.innerHTML = `<strong>Error:</strong> Failed to validate email. Please try again.`;
+                console.error('Error:', error);
+            }
+        }
+        
+        // Allow Enter key to trigger validation
+        document.getElementById('email').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                validateEmail();
+            }
+        });
+    </script>
+</body>
+</html>
